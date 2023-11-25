@@ -1,18 +1,20 @@
 package quotegenerator.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import quotegenerator.config.MailConfig;
 import quotegenerator.dto.request.JavaMailerRequest;
 import quotegenerator.dto.request.LoginRequest;
 import quotegenerator.dto.request.RegistrationRequest;
 import quotegenerator.dto.response.LoginResponse;
 import quotegenerator.dto.response.RegistrationResponse;
 import quotegenerator.exception.UserAlreadyExistException;
-import quotegenerator.model.Quote;
+import quotegenerator.exception.UserLoginWithInvalidCredentialsException;
 import quotegenerator.model.User;
 import quotegenerator.repository.QuoteRepository;
 import quotegenerator.repository.UserRepository;
+
+import java.util.Optional;
 
 
 @Service
@@ -24,9 +26,9 @@ public class QuotesGeneratorService implements QuotesServices{
 
     private final MailService mailService;
     private final TokenService tokenService;
+    private MailConfig mailConfig;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+
 
     @Override
     public RegistrationResponse register(RegistrationRequest request) {
@@ -43,7 +45,7 @@ public class QuotesGeneratorService implements QuotesServices{
         javaMailerRequest.setTo(email);
         javaMailerRequest.setMessage("Hello bellow is your token " + token);
         javaMailerRequest.setSubject("Quote verification otp");
-        javaMailerRequest.setFrom(fromEmail);
+        javaMailerRequest.setFrom(mailConfig.getFromEmail());
 
         sendToken(javaMailerRequest);
 
@@ -76,6 +78,25 @@ public class QuotesGeneratorService implements QuotesServices{
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
-        return null;
+        String username = loginRequest.getUsername();
+        String password = loginRequest.getPassword();
+
+        boolean isAuthenticated = authenticate(username, password);
+        if (!isAuthenticated) {
+            throw new UserLoginWithInvalidCredentialsException("Invalid credentials");
+        }
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setMessage("Login successful");
+        return loginResponse;
     }
+
+    private boolean authenticate(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user != null){
+            return user.getPassword().equals(password);
+        }
+        return false;
+    }
+
 }

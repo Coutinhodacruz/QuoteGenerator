@@ -20,13 +20,13 @@ public class JavaMailer implements MailService{
         String subject = javaMailerRequest.getSubject();
         String sender = javaMailerRequest.getFrom();
         try{
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setTo(mailReceiver);
-            simpleMailMessage.setText(message);
-            simpleMailMessage.setSubject(subject);
-            simpleMailMessage.setFrom(sender);
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setTo(mailReceiver);
+            mailMessage.setText(message);
+            mailMessage.setSubject(subject);
+            mailMessage.setFrom(sender);
 
-            mailSender.send(simpleMailMessage);
+            mailSender.send(mailMessage);
         }catch (Exception exception){
             throw new RuntimeException(exception);
         }
