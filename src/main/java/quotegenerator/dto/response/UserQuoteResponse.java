@@ -5,9 +5,13 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class LoginResponse {
+public class UserQuoteResponse {
+
+    private Long id;
 
     private String message;
 
-    private String jwtToken;
+    private String content;
+
+    private boolean userGenerated;
 }

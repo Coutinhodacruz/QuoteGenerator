@@ -13,4 +13,9 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
     List<Quote> findByUserGenerated(boolean userGenerated);
 
 
+    boolean existsByContent(String content);
+
+//    Quote findNextQuote(boolean userGenerated, Long currentQuoteId);
+//
+//    Quote findPreviousQuote(boolean userGenerated, Long currentQuoteId);
 }
