@@ -6,8 +6,10 @@ import quotegenerator.dto.request.UserQuoteRequest;
 import quotegenerator.dto.response.LoginResponse;
 import quotegenerator.dto.response.RegistrationResponse;
 import quotegenerator.dto.response.UserQuoteResponse;
+import quotegenerator.model.Quote;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface QuotesServices {
 
@@ -29,8 +31,6 @@ public interface QuotesServices {
 
     String generateGoodReadsQuote();
 
-//    UserQuoteResponse getNextQuote(boolean userGenerated);
-
-//    UserQuoteResponse getPreviousQuote(boolean userGenerated);
+    Optional<Quote> getPreviousQuote(Long currentQuoteId);
 }
 

@@ -13,9 +13,7 @@ import quotegenerator.dto.request.UserQuoteRequest;
 import quotegenerator.dto.response.LoginResponse;
 import quotegenerator.dto.response.RegistrationResponse;
 import quotegenerator.dto.response.UserQuoteResponse;
-import quotegenerator.exception.UserAlreadyExistException;
-import quotegenerator.exception.UserLoginWithInvalidCredentialsException;
-import quotegenerator.exception.UserQuoteAlreadyExistException;
+import quotegenerator.exception.*;
 import quotegenerator.model.Quote;
 import quotegenerator.model.User;
 import quotegenerator.repository.QuoteRepository;
@@ -23,6 +21,7 @@ import quotegenerator.repository.UserRepository;
 import quotegenerator.utils.JwtUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -40,11 +39,6 @@ public class QuotesGeneratorService implements QuotesServices{
 
     private final WebClient webClient = WebClient.create();
     private MailConfig mailConfig;
-
-//    private Long currentQuoteId;
-
-
-
 
 
     @Override
@@ -210,6 +204,11 @@ public class QuotesGeneratorService implements QuotesServices{
     }
 
 
+    private List<UserQuoteResponse> mapToResponseList(List<Quote> quotes) {
+        return quotes.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 
 
     @Override
@@ -258,40 +257,23 @@ public class QuotesGeneratorService implements QuotesServices{
                 .block();
     }
 
+    @Override
+    public Optional<Quote> getPreviousQuote(Long currentQuoteId) {
+        Quote currentQuote = quoteRepository.findById(currentQuoteId).orElse(null);
 
-//    @Override
-//    public UserQuoteResponse getNextQuote(boolean userGenerated) {
-//        Quote nextQuote = quoteRepository.findNextQuote(userGenerated, getCurrentQuoteId());
-//        updateCurrentQuoteId(nextQuote.getId());
-//        return mapToResponse(nextQuote);
-//    }
-//
-//    @Override
-//    public UserQuoteResponse getPreviousQuote(boolean userGenerated) {
-//        Quote previousQuote = quoteRepository.findPreviousQuote(userGenerated, getCurrentQuoteId());
-//        updateCurrentQuoteId(previousQuote.getId());
-//        return mapToResponse(previousQuote);
-//    }
-//
-//// Helper methods
+        if (currentQuote == null) {
+            return Optional.empty();
+        }
 
-    private List<UserQuoteResponse> mapToResponseList(List<Quote> quotes) {
-        return quotes.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        boolean isUserGenerated = currentQuote.isUserGenerated();
+        Long previousQuoteId = quoteRepository.findPreviousQuoteId(isUserGenerated, currentQuoteId);
+
+        if (previousQuoteId != null) {
+            return quoteRepository.findById(previousQuoteId);
+        } else {
+            return Optional.empty();
+        }
     }
-
-
-    // You may implement these methods based on your actual storage mechanism.
-//    private Long getCurrentQuoteId() {
-//        return currentQuoteId;
-//
-//    }
-//
-//    private void updateCurrentQuoteId(Long quoteId) {
-//
-//        currentQuoteId = quoteId;
-//    }
 
 
     private boolean authenticate(String username, String password) {
@@ -304,3 +286,79 @@ public class QuotesGeneratorService implements QuotesServices{
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//    @Override
+//    public UserQuoteResponse getNextQuote(boolean userGenerated) {
+//        Long nextQuoteId = getNextQuoteId(userGenerated);
+//        Quote nextQuote = quoteRepository.findById(nextQuoteId)
+//                .orElseThrow(() -> new NextQuoteNotFoundException("Next quote not found"));
+//
+//        updateCurrentQuoteId(nextQuoteId);
+//        return mapToUserQuoteResponse(nextQuote);
+//    }
+//
+//    private void updateCurrentQuoteId(Long nextQuoteId) {
+//        currentQuoteId = nextQuoteId;
+//    }
+//
+//    @Override
+//    public UserQuoteResponse getPreviousQuote(boolean userGenerated) {
+//        Long previousQuoteId = getPreviousQuoteId(userGenerated);
+//        Quote previousQuote = quoteRepository.findById(previousQuoteId)
+//                .orElseThrow(() -> new PreviousQuoteNotFoundException("Previous quote not found"));
+//
+//        updateCurrentQuoteId(previousQuoteId);
+//        return mapToUserQuoteResponse(previousQuote);
+//    }
+//
+//    private Long getNextQuoteId(boolean userGenerated) {
+//        Long currentQuoteId = getCurrentQuoteId();
+//        return quoteRepository.findNextQuote(userGenerated, currentQuoteId);
+//    }
+//
+//    private Long getPreviousQuoteId(boolean userGenerated) {
+//        Long currentQuoteId = getCurrentQuoteId();
+//        return quoteRepository.findPreviousQuote(userGenerated, currentQuoteId);
+//    }
+
+//    private Long getCurrentQuoteId() {
+//        return currentQuoteId;
+//    }

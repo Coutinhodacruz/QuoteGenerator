@@ -7,6 +7,8 @@ import lombok.Setter;
 @Getter
 public class UserQuoteRequest {
 
+    private Long id;
+
     private String content;
 
     private boolean userGenerated;

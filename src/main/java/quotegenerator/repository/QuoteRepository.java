@@ -1,11 +1,10 @@
 package quotegenerator.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import quotegenerator.model.Quote;
-import quotegenerator.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
@@ -15,7 +14,7 @@ public interface QuoteRepository extends JpaRepository<Quote, Long> {
 
     boolean existsByContent(String content);
 
-//    Quote findNextQuote(boolean userGenerated, Long currentQuoteId);
-//
-//    Quote findPreviousQuote(boolean userGenerated, Long currentQuoteId);
+
+    @Query("SELECT q FROM Quote q WHERE q.userGenerated = ?1 AND q.id < ?2 ORDER BY q.id DESC")
+    Long findPreviousQuoteId(boolean userGenerated, Long currentQuoteId);
 }

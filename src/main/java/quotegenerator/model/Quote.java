@@ -22,6 +22,10 @@ public class Quote {
     private boolean userGenerated;
     private String createdAt;
 
+    private Long previousQuoteId;
+
+
+
 
     @PrePersist
     public void setCreatedAt(){

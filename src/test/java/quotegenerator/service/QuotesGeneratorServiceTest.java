@@ -13,7 +13,10 @@ import quotegenerator.dto.response.RegistrationResponse;
 import quotegenerator.dto.response.UserQuoteResponse;
 import quotegenerator.exception.UserAlreadyExistException;
 import quotegenerator.exception.UserQuoteAlreadyExistException;
+import quotegenerator.model.Quote;
+
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -198,5 +201,50 @@ public class QuotesGeneratorServiceTest {
         assertThat(result).isNotNull();
         System.out.println("GoodReads Quote: " + result);
     }
+
+
+    @Test
+    void testGetPreviousQuoteWhenCurrentQuoteNotFound() {
+
+        Optional<Quote> result = quotesGeneratorService.getPreviousQuote(1L);
+        System.out.println(result);
+
+        assertThat(result.isPresent()).isFalse();
+    }
+
+    @Test
+    void testGetPreviousQuote() {
+        // Create the first quote
+        UserQuoteRequest requestOne = new UserQuoteRequest();
+        requestOne.setContent("Make choices and don't look back.");
+        requestOne.setUserGenerated(true);
+        UserQuoteResponse responseOne = quotesGeneratorService.userQuote(requestOne);
+
+        assertThat(responseOne).isNotNull();
+        assertThat(responseOne.getContent()).isEqualTo(requestOne.getContent());
+        assertThat(responseOne.isUserGenerated()).isEqualTo(requestOne.isUserGenerated());
+
+        // Create the second quote
+        UserQuoteRequest requestTwo = new UserQuoteRequest();
+        requestTwo.setContent("Gratitude is said to be the secret to happiness.");
+        requestTwo.setUserGenerated(true);
+        UserQuoteResponse responseTwo = quotesGeneratorService.userQuote(requestTwo);
+
+        assertThat(responseTwo).isNotNull();
+        assertThat(responseTwo.getContent()).isEqualTo(requestTwo.getContent());
+        assertThat(responseTwo.isUserGenerated()).isEqualTo(requestTwo.isUserGenerated());
+
+        // Retrieve the previous quote
+        Long currentQuoteId = responseTwo.getId();
+        Optional<Quote> result = quotesGeneratorService.getPreviousQuote(currentQuoteId);
+
+        assertThat(result.isPresent()).isTrue();
+
+        // Modify the assertions based on your actual implementation of the Quote entity
+        assertEquals(responseOne.getId(), result.get().getId());
+        assertEquals(responseOne.getContent(), result.get().getContent());
+        assertEquals(responseOne.isUserGenerated(), result.get().isUserGenerated());
+    }
+
 
 }
